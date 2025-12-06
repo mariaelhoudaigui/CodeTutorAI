@@ -6,9 +6,12 @@ from langchain_core.prompts import PromptTemplate
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
+import json
+
 load_dotenv()
 # --- CONFIGURATION GEMINI ---
 # Remplace par ta vraie clé
+
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -24,15 +27,30 @@ app = FastAPI(title="Backend Chat IA")
 class ChatRequest(BaseModel):
     message: str
 
+
+# --- Charger les textes depuis le JSON ---
+with open("geeks_texts.json", "r", encoding="utf-8") as f:
+    all_texts = json.load(f)
+
 # --- RAG (FAISS) ---
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vector_store = FAISS.from_texts(["Bienvenue dans le tutoriel."], embeddings)
+vector_store = FAISS.from_texts(all_texts, embeddings)
 retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
+
 
 prompt_template = PromptTemplate(
     input_variables=["context", "question"],
-    template="Contexte: {context}\nQuestion: {question}\nRéponse experte:"
+    template="""
+Tu es un assistant expert en programmation.
+Voici des informations supplémentaires pouvant aider à répondre, mais tu peux aussi utiliser tes connaissances générales.
+
+Contexte (Aide supplémentaire) : {context}
+Question : {question}
+
+Réponse experte :
+"""
 )
+
 
 def generate_gemini(text):
     try:
@@ -46,7 +64,6 @@ def chat_endpoint(req: ChatRequest):
     user_msg = req.message
     
     # RAG : On ajoute la question et on cherche le contexte
-    vector_store.add_texts([user_msg]) 
     docs = retriever.invoke(user_msg)
     context_text = "\n".join([d.page_content for d in docs])
     
