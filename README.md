@@ -1,53 +1,53 @@
-# Tuteur IA – Application d’apprentissage et d’exécution de code
+# AI Tutor – Code Learning and Execution Application
 
-## Description du projet
+## Project Description
 
-**Tuteur IA** est une application web interactive qui agit comme un **tuteur spécialisé en programmation et informatique**. Elle permet aux utilisateurs de :
+**AI Tutor** is an interactive web application that acts as a **specialized tutor in programming and computer science**. It allows users to:
 
-- Poser des questions sur la programmation et obtenir des **tutoriels détaillés et structurés**.
-- Exécuter du code dans différents langages via une API intégrée.
-- Générer des **quiz interactifs** basés sur les tutoriels pour renforcer l’apprentissage.
-- Naviguer à travers une interface conviviale avec plusieurs pages : **Home, Chat, Quiz**.
+- Ask questions about programming and receive **detailed and structured tutorials**.
+- Execute code in different languages via an integrated API.
+- Generate **interactive quizzes** based on tutorials to reinforce learning.
+- Navigate through a user-friendly interface with multiple pages: **Home, Chat, Quiz**.
 
-L’application combine plusieurs technologies :
+The application combines several technologies:
 
-- **Backend** : FastAPI pour les endpoints de chat, exécution de code et génération de quiz.
-- **Frontend** : Streamlit pour l’interface utilisateur.
-- **RAG (Retrieval-Augmented Generation)** : FAISS + HuggingFaceEmbeddings pour enrichir les réponses avec des documents existants.
-- **IA générative** : Google Gemini (Gemini Flash) pour générer des tutoriels et quiz structurés.
+- **Backend**: FastAPI for chat, code execution, and quiz generation endpoints.
+- **Frontend**: Streamlit for the user interface.
+- **RAG (Retrieval-Augmented Generation)**: FAISS + HuggingFaceEmbeddings to enrich answers with existing documents.
+- **Generative AI**: Google Gemini (Gemini Flash) to generate structured tutorials and quizzes.
 
 ---
 
-## Fonctionnalités principales
+## Main Features
 
-1. **Chat avec tutoriel IA**
-   - Posez des questions liées à la programmation.
-   - L’IA refuse poliment les questions hors domaine.
-   - Génère des tutoriels structurés en 3 niveaux : débutant, intermédiaire, avancé.
+1. **AI Tutorial Chat**
+   - Ask programming-related questions.
+   - The AI politely refuses questions outside its domain.
+   - Generates structured tutorials in 3 levels: beginner, intermediate, advanced.
 
-2. **Exécution de code**
-   - Supporte plusieurs langages : Python, JavaScript, C, Java, Go, Ruby, PHP.
-   - Utilise l’API Piston pour exécuter le code côté serveur.
+2. **Code Execution**
+   - Supports multiple languages: Python, JavaScript, C, Java, Go, Ruby, PHP.
+   - Uses the Piston API to execute code on the server side.
 
-3. **Quiz généré automatiquement**
-   - À partir du texte du tutoriel, un quiz de 10 questions à choix multiples est généré.
-   - Réponse formatée en JSON pour intégration facile sur l’interface.
+3. **Automatically Generated Quiz**
+   - From the tutorial text, a 10-question multiple-choice quiz is generated.
+   - Answers are formatted in JSON for easy integration into the interface.
 
 4. **RAG (Retrieval-Augmented Generation)**
-   - Utilisation d’un corpus local `geeks_texts.json` pour améliorer les réponses.
-   - Embeddings générés avec HuggingFace + FAISS pour récupérer les documents pertinents.
+   - Uses a local corpus `geeks_texts.json` to improve responses.
+   - Embeddings generated with HuggingFace + FAISS to retrieve relevant documents.
 
 ---
 
 ## Installation
 
-### 1. Cloner le projet
+### 1. Clone the project
 
 ```bash
-git clone <URL_DU_PROJET>
+git clone <PROJECT_URL>
 ````
 
-### 2. Créer un environnement virtuel
+### 2. Create a virtual environment
 
 ```bash
 python -m venv .venv
@@ -55,23 +55,23 @@ source .venv/bin/activate  # Linux/Mac
 .venv\Scripts\activate     # Windows
 ```
 
-### 3. Installer les dépendances
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configuration des variables d’environnement
+### 4. Configure environment variables
 
-Créer un fichier `.env` à la racine du projet et ajouter :
+Create a `.env` file at the project root and add:
 
 ```env
-GOOGLE_API_KEY=VOTRE_CLE_API_GEMINI
+GOOGLE_API_KEY=YOUR_GEMINI_API_KEY
 ```
 
-### 5. Génération du corpus JSON
+### 5. Generate the JSON corpus
 
-Le fichier `scraper.py` doit être exécuté **une seule fois** pour générer `geeks_texts.json`, qui sera utilisé par le RAG :
+The `scraper.py` file must be run **only once** to generate `geeks_texts.json`, which will be used by the RAG:
 
 ```bash
 python scraper.py
@@ -79,75 +79,70 @@ python scraper.py
 
 ---
 
-## Lancement de l’application
+## Running the Application
 
-### Backend FastAPI
+### FastAPI Backend
 
 ```bash
 uvicorn main:app --reload
 ```
 
-* L’API sera disponible sur : `http://127.0.0.1:8000`
-* Endpoints disponibles :
+* The API will be available at: `http://127.0.0.1:8000`
+* Available endpoints:
 
-  * `/chat` : poser une question au tuteur IA
-  * `/execute` : exécuter du code
-  * `/generate_quiz` : générer un quiz à partir d’un tutoriel
+  * `/chat` : ask a question to the AI tutor
+  * `/execute` : execute code
+  * `/generate_quiz` : generate a quiz from a tutorial
 
-### Frontend Streamlit
+### Streamlit Frontend
 
 ```bash
 streamlit run home.py
 ```
 
-* L’interface principale (Home) permet de naviguer vers :
+* The main interface (Home) allows navigation to:
 
   * **Chat**
   * **Quiz**
-  * **Exécution de code**
+  * **Code Execution**
 
 ---
 
+## Usage
 
-## Utilisation
+1. **Tutorial Chat**
 
-1. **Chat Tutoriel**
+   * Enter a programming question.
+   * Receive a structured tutorial in 3 levels.
 
-   * Entrer une question sur la programmation.
-   * Recevoir un tutoriel structuré en 3 niveaux.
+2. **Code Execution**
 
-2. **Exécution de code**
-
-   * Sélectionner le langage et coller le code.
-   * Appuyer sur `Run` pour voir le résultat.
+   * Select the language and paste the code.
+   * Click `Run` to see the result.
 
 3. **Quiz**
 
-   * Générer un quiz de 10 questions à choix multiples  à partir du dernier tutoriel.
+   * Generate a 10-question multiple-choice quiz from the last tutorial.
 
 ---
 
-## Captures d’écran
+## Screenshots
 
-### Page Home
+### Home Page
 
 ![Home](home.png)
 
-### Page Chat
+### Chat Page
 
 ![Chat](chat.png)
 
-### Page Quiz
+### Quiz Page
 
 ![Quiz](quiz.png)
 
-
-
+---
 
 ## Contributions
 
-Les contributions sont les bienvenues !
-Merci de respecter les standards de codage et d’indiquer vos modifications dans des branches séparées.
-
-
-
+Contributions are welcome!
+Please respect coding standards and indicate your changes in separate branches.
