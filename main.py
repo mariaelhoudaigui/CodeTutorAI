@@ -1,5 +1,4 @@
 import io
-import uvicorn
 import subprocess
 import sys
 import tempfile
@@ -42,12 +41,6 @@ class ChatRequest(BaseModel):
 class CodeRequest(BaseModel):
     language: str
     code: str
-
-
-class QuizRequest(BaseModel):
-    tutorial_text: str
-    num_questions: int = 8  # nombre de questions à générer
-
 
 # --- Charger les textes depuis le JSON ---
 with open("geeks_texts.json", "r", encoding="utf-8") as f:
@@ -104,10 +97,12 @@ LANGUAGE_MAP = {
     "python": "python",
     "javascript": "javascript",
     "c": "c",
+    "cpp": "cpp",
     "java": "java",
     "go": "go",
     "ruby": "ruby",
     "php": "php",
+    "swift": "swift"
 }
 
 
@@ -116,7 +111,7 @@ def execute_code(req: CodeRequest):
 
     language = req.language.lower()
 
-    if language not in ["python", "javascript", "java", "c", "go", "rust", "ruby", "php"]:
+    if language not in ["python", "javascript", "java", "c", "cpp", "go", "rust", "ruby", "php"]:
         return {"output": f"Langage {req.language} non supporté."}
 
     payload = {
@@ -150,36 +145,35 @@ def execute_code(req: CodeRequest):
 
     except Exception as e:
         return {"output": f"Erreur API Piston : {e}"}
-    
-@app.post("/quiz")
+
+
+class QuizRequest(BaseModel):
+    tutorial_text: str  # texte du tutoriel à partir duquel générer le quiz
+
+
+@app.post("/generate_quiz")
 def generate_quiz(req: QuizRequest):
-    # Prompt simplifié pour Gemini
-    prompt_quiz = (
-        f"Tu es un expert pédagogique en programmation. "
-        f"Génère {req.num_questions} questions de quiz basées uniquement sur ce tutoriel :\n\n"
-        f"{req.tutorial_text}\n\n"
-        f"Répond **uniquement** avec un JSON strict de la forme :\n"
-        f"[{{'question':'Texte de la question','options':['A','B','C','D'],'answer':'A'}}, ...]\n"
-        f"Aucune autre explication, aucun texte supplémentaire, seulement le JSON."
-    )
-
-    # Appel Gemini
-    response_text = generate_gemini(prompt_quiz)
-
-    # Tentative de parsing JSON
+    prompt = f"""
+    Génère un quiz de 10 questions à choix multiples à partir de ce tutoriel :
+    {req.tutorial_text}
+    Réponds UNIQUEMENT au format JSON suivant :
+    {{
+        "quiz_title": "Quiz sur le tutoriel",
+        "questions": [
+            {{
+                "question": "...",
+                "options": ["...","...","...","..."],
+                "answer": 0
+            }}
+        ]
+    }}
+    """
     try:
-        quiz_json = json.loads(response_text)
-        if not isinstance(quiz_json, list):
-            raise ValueError("JSON mal formé")
+        response = model.generate_content(prompt)
+        # NETTOYAGE : Enlève les balises ```json si Gemini les ajoute
+        raw_text = response.text.strip().replace("```json", "").replace("```", "")
+        quiz_json = json.loads(raw_text)
+        return {"quiz": quiz_json}
     except Exception as e:
-        # Si la génération échoue, renvoyer toujours un JSON vide et le texte brut
-        return {
-            "quiz": [],
-            "error": f"Impossible de générer le quiz correctement: {e}",
-            "raw": response_text
-        }
-
-    return {"quiz": quiz_json}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+        print(f"Erreur : {e}")
+        return {"quiz": {}, "error": str(e)}

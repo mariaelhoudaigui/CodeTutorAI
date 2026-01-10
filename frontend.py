@@ -121,28 +121,45 @@ with col_ide:
     # ===================================================================
     st.subheader("Quiz basé sur votre dernière question")
 
-    if st.session_state.latest_question:
-        if st.button("Start Quiz"):
+    if st.button("Start Quiz"):
+        if not st.session_state.latest_tutorial:
+            st.warning("Pose d'abord une question au chatbot.")
+        else:
             try:
                 res = requests.post(API_QUIZ, json={
-                    "tutorial_text": st.session_state.latest_question,
+                    "tutorial_text": st.session_state.latest_tutorial,
                     "num_questions": 5
                 })
                 if res.status_code == 200:
-                    st.session_state.quiz = res.json()["quiz"]
+                    st.session_state.quiz = res.json().get("quiz", [])
                 else:
                     st.error(f"Erreur API : {res.text}")
             except Exception as e:
                 st.error(f"Erreur communication : {e}")
 
+
     # Affichage du quiz si généré
+    
+    
+        # Affichage du quiz si généré
     if st.session_state.quiz:
+        st.subheader("Répondez aux questions :")
         score = 0
+        user_answers = []
+
         for i, q in enumerate(st.session_state.quiz):
             st.markdown(f"**Q{i+1}: {q['question']}**")
-            user_choice = st.radio("", q["options"], key=f"q{i}")
-            if user_choice == q["answer"]:
-                score += 1
+            user_choice = st.radio(
+                label="",
+                options=q["options"],
+                key=f"q_{i}"
+            )
+            user_answers.append(user_choice)
 
         if st.button("Valider le Quiz"):
+            for ans, q in zip(user_answers, st.session_state.quiz):
+                if ans == q["answer"]:
+                    score += 1
+
             st.success(f"Votre score : {score} / {len(st.session_state.quiz)}")
+
