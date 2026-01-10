@@ -131,15 +131,15 @@ streamlit run home.py
 
 ### Page Home
 
-![Home](chemin/vers/home.png)
+![Home](home.png)
 
 ### Page Chat
 
-![Chat](chemin/vers/chat.png)
+![Chat](chat.png)
 
 ### Page Quiz
 
-![Quiz](chemin/vers/quiz.png)
+![Quiz](quiz.png)
 
 
 
